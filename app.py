@@ -1,182 +1,374 @@
 import streamlit as st
-import joblib
-import random
-import os
 
 
 # =========================================================
-# LOAD MODEL
-# =========================================================
-
-model = joblib.load("iris_model.pkl")
-
-
-# =========================================================
-# PAGE SETTINGS
+# PAGE CONFIG
 # =========================================================
 
 st.set_page_config(
     page_title="Iris Flower Classification",
     page_icon="🌸",
-    layout="wide"
+    layout="wide",
+    initial_sidebar_state="collapsed"
 )
 
 
 # =========================================================
-# CUSTOM DESIGN
+# CUSTOM CSS
 # =========================================================
 
 st.markdown("""
 <style>
 
-.stApp {
-    background: linear-gradient(
-        135deg,
-        #fff0f7 0%,
-        #f3e8ff 35%,
-        #e8f8f0 70%,
-        #fff8e1 100%
-    );
+/* ---------- REMOVE SIDEBAR ---------- */
+
+[data-testid="stSidebar"] {
+    display: none;
 }
+
+[data-testid="stSidebarCollapsedControl"] {
+    display: none;
+}
+
+
+/* ---------- MAIN BACKGROUND ---------- */
+
+.stApp {
+    background:
+        radial-gradient(
+            circle at 15% 15%,
+            rgba(59, 130, 246, 0.18),
+            transparent 30%
+        ),
+        radial-gradient(
+            circle at 85% 20%,
+            rgba(139, 92, 246, 0.15),
+            transparent 30%
+        ),
+        radial-gradient(
+            circle at 50% 100%,
+            rgba(236, 72, 153, 0.10),
+            transparent 35%
+        ),
+        linear-gradient(
+            135deg,
+            #020617 0%,
+            #0f172a 50%,
+            #111827 100%
+        );
+}
+
+
+/* ---------- PAGE WIDTH ---------- */
 
 .block-container {
-    padding-top: 2rem;
-    padding-bottom: 2rem;
+    max-width: 1200px;
+    padding-top: 30px;
+    padding-bottom: 50px;
 }
 
-.main-title {
+
+/* ---------- HERO ---------- */
+
+.hero {
     text-align: center;
-    font-size: 46px;
-    font-weight: 900;
-    color: #7b1fa2;
-    margin-bottom: 5px;
+    padding: 45px 20px 35px 20px;
 }
 
-.subtitle {
-    text-align: center;
-    font-size: 19px;
-    font-weight: 700;
-    color: #2e7d32;
-    margin-bottom: 25px;
-}
-
-.section-title {
-    font-size: 27px;
-    font-weight: 900;
-    color: #8e24aa;
-    margin-top: 15px;
+.hero-icon {
+    font-size: 70px;
     margin-bottom: 10px;
+    filter: drop-shadow(0 0 25px rgba(244,114,182,0.35));
 }
 
-.stApp p {
-    color: #333333;
-}
+.hero-title {
+    font-size: 52px;
+    line-height: 1.1;
+    font-weight: 850;
+    letter-spacing: -1.5px;
 
-label {
-    color: #6a1b9a !important;
-    font-weight: 700 !important;
-}
-
-div[data-baseweb="input"] {
-    border-radius: 12px;
-    border: 2px solid #ce93d8;
-    background-color: white;
-}
-
-.stButton > button {
-    width: 100%;
-    min-height: 55px;
     background: linear-gradient(
         90deg,
-        #ab47bc,
-        #ec407a
+        #60a5fa,
+        #a78bfa,
+        #f472b6
     );
-    color: white !important;
-    border: none;
-    border-radius: 15px;
-    font-size: 18px;
-    font-weight: 900;
+
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
-.stButton > button:hover {
-    background: linear-gradient(
-        90deg,
-        #8e24aa,
-        #d81b60
-    );
-    color: white !important;
-}
-
-.result-box {
-    background: linear-gradient(
-        135deg,
-        #fce4ec,
-        #f3e5f5
-    );
-    border: 3px solid #ab47bc;
-    border-radius: 20px;
-    padding: 25px;
-    text-align: center;
+.hero-subtitle {
+    color: #e2e8f0;
+    font-size: 21px;
+    font-weight: 500;
     margin-top: 15px;
 }
 
-.result-title {
-    color: #6a1b9a;
-    font-size: 20px;
-    font-weight: 800;
-}
+.hero-description {
+    max-width: 760px;
+    margin: 20px auto 0 auto;
 
-.flower-name {
-    color: #c2185b;
-    font-size: 36px;
-    font-weight: 900;
-}
-
-.confidence-text {
-    color: #2e7d32;
-    font-weight: 800;
+    color: #94a3b8;
     font-size: 16px;
-}
-
-.project-card {
-    background: rgba(255,255,255,0.92);
-    border-radius: 18px;
-    padding: 20px;
-    text-align: center;
-    border: 2px solid #e1bee7;
-    min-height: 140px;
-}
-
-.project-card-title {
-    color: #8e24aa;
-    font-size: 20px;
-    font-weight: 900;
-}
-
-.project-card-text {
-    color: #424242;
-    font-size: 15px;
-    font-weight: 600;
     line-height: 1.8;
 }
 
-.footer {
+
+/* ---------- BADGE ---------- */
+
+.badge-container {
     text-align: center;
-    color: #6a1b9a;
-    font-size: 15px;
-    font-weight: 700;
-    margin-top: 30px;
+    margin-top: 5px;
 }
 
-hr {
-    border: none;
-    height: 2px;
-    background: linear-gradient(
-        90deg,
-        #ec407a,
-        #ab47bc,
-        #66bb6a
-    );
+.badge {
+    display: inline-block;
+
+    padding: 7px 16px;
+
+    border-radius: 30px;
+
+    background: rgba(96,165,250,0.10);
+
+    border: 1px solid rgba(96,165,250,0.25);
+
+    color: #bfdbfe;
+
+    font-size: 13px;
+    font-weight: 600;
+}
+
+
+/* ---------- SECTION TITLE ---------- */
+
+.section-title {
+    color: #f8fafc;
+    font-size: 27px;
+    font-weight: 750;
+
+    margin-top: 35px;
+    margin-bottom: 18px;
+}
+
+
+/* ---------- NAVIGATION CARDS ---------- */
+
+div.stButton > button {
+
+    width: 100%;
+    min-height: 115px;
+
+    border-radius: 18px;
+
+    border: 1px solid rgba(255,255,255,0.10);
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(255,255,255,0.08),
+            rgba(255,255,255,0.025)
+        );
+
+    color: #f8fafc;
+
+    font-size: 17px;
+    font-weight: 700;
+
+    box-shadow:
+        0 8px 25px rgba(0,0,0,0.18);
+
+    transition:
+        transform 0.25s ease,
+        border-color 0.25s ease,
+        background 0.25s ease;
+}
+
+
+div.stButton > button:hover {
+
+    transform: translateY(-5px);
+
+    border-color: rgba(147,197,253,0.55);
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(96,165,250,0.16),
+            rgba(167,139,250,0.08)
+        );
+
+    color: #ffffff;
+
+    box-shadow:
+        0 12px 35px rgba(59,130,246,0.15);
+}
+
+
+/* ---------- STAT CARDS ---------- */
+
+.stat-card {
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(255,255,255,0.075),
+            rgba(255,255,255,0.025)
+        );
+
+    border: 1px solid rgba(255,255,255,0.10);
+
+    border-radius: 18px;
+
+    padding: 22px;
+
+    text-align: center;
+
+    box-shadow:
+        0 8px 25px rgba(0,0,0,0.15);
+}
+
+.stat-number {
+    color: #93c5fd;
+    font-size: 31px;
+    font-weight: 800;
+}
+
+.stat-label {
+    color: #94a3b8;
+    font-size: 13px;
+    margin-top: 5px;
+}
+
+
+/* ---------- INFO CARD ---------- */
+
+.info-card {
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(255,255,255,0.065),
+            rgba(255,255,255,0.025)
+        );
+
+    border: 1px solid rgba(255,255,255,0.09);
+
+    border-radius: 20px;
+
+    padding: 28px;
+
+    margin-top: 10px;
+
+    box-shadow:
+        0 10px 30px rgba(0,0,0,0.12);
+}
+
+.info-heading {
+    color: #f8fafc;
+    font-size: 21px;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+.info-text {
+    color: #aebbd0;
+    line-height: 1.8;
+    font-size: 14px;
+}
+
+
+/* ---------- FEATURE CARDS ---------- */
+
+.feature-card {
+
+    background: rgba(255,255,255,0.045);
+
+    border: 1px solid rgba(255,255,255,0.08);
+
+    border-radius: 16px;
+
+    padding: 20px;
+
+    text-align: center;
+
+    min-height: 135px;
+}
+
+.feature-icon {
+    font-size: 30px;
+}
+
+.feature-title {
+    color: #f8fafc;
+    font-size: 15px;
+    font-weight: 700;
+    margin-top: 8px;
+}
+
+.feature-text {
+    color: #94a3b8;
+    font-size: 12px;
+    margin-top: 5px;
+}
+
+
+/* ---------- TECHNOLOGY TAGS ---------- */
+
+.tech-container {
+    text-align: center;
+    margin-top: 10px;
+}
+
+.tech {
+
+    display: inline-block;
+
+    padding: 8px 15px;
+
+    margin: 5px;
+
+    border-radius: 25px;
+
+    background: rgba(96,165,250,0.08);
+
+    border: 1px solid rgba(96,165,250,0.18);
+
+    color: #bfdbfe;
+
+    font-size: 13px;
+}
+
+
+/* ---------- DIVIDER ---------- */
+
+.divider {
+    height: 1px;
+
+    background:
+        linear-gradient(
+            90deg,
+            transparent,
+            rgba(255,255,255,0.15),
+            transparent
+        );
+
+    margin: 40px 0;
+}
+
+
+/* ---------- FOOTER ---------- */
+
+.footer {
+    text-align: center;
+
+    color: #64748b;
+
+    font-size: 13px;
+
+    line-height: 1.8;
+
+    margin-top: 45px;
 }
 
 </style>
@@ -184,501 +376,313 @@ hr {
 
 
 # =========================================================
-# HEADER
+# HERO SECTION
+# =========================================================
+
+st.markdown("""
+<div class="hero">
+
+    <div class="hero-icon">🌸</div>
+
+    <div class="badge-container">
+        <span class="badge">
+            MACHINE LEARNING PROJECT
+        </span>
+    </div>
+
+    <div class="hero-title">
+        Iris Flower Classification
+    </div>
+
+    <div class="hero-subtitle">
+        Intelligent Flower Species Prediction Using Machine Learning
+    </div>
+
+    <div class="hero-description">
+        A machine learning application that analyzes four flower
+        measurements and predicts the species of an Iris flower.
+        Explore the dataset, analyze patterns, understand the model,
+        and make real-time predictions through an interactive interface.
+    </div>
+
+</div>
+""", unsafe_allow_html=True)
+
+
+# =========================================================
+# NAVIGATION
 # =========================================================
 
 st.markdown(
-    '<div class="main-title">🌸 Iris Flower Classification 🌸</div>',
+    '<div class="section-title">Explore the Project</div>',
     unsafe_allow_html=True
 )
 
-st.markdown(
-    '<div class="subtitle">'
-    '🌿 Machine Learning Based Flower Species Prediction System 🌿'
-    '</div>',
-    unsafe_allow_html=True
-)
-
-st.divider()
-
-
-# =========================================================
-# INTRODUCTION
-# =========================================================
-
-st.info(
-    "🌺 This application uses a Machine Learning model to "
-    "predict the species of an Iris flower using its "
-    "sepal and petal measurements."
-)
-
-
-# =========================================================
-# INPUT SECTION
-# =========================================================
-
-st.markdown(
-    '<div class="section-title">🌿 Enter Flower Measurements</div>',
-    unsafe_allow_html=True
-)
-
-st.write(
-    "Enter the flower measurements in centimeters (cm)."
-)
-
-
-col1, col2 = st.columns(2)
-
-
-# =========================================================
-# LEFT SIDE
-# =========================================================
+col1, col2, col3 = st.columns(3)
 
 with col1:
+    if st.button(
+        "🌸\n\nMAKE A PREDICTION",
+        use_container_width=True
+    ):
+        st.switch_page("pages/Prediction.py")
 
-    sepal_length = st.number_input(
-        "🌿 Sepal Length (cm)",
-        min_value=0.0,
-        max_value=10.0,
-        value=5.1,
-        step=0.1
-    )
-
-    sepal_width = st.number_input(
-        "🍃 Sepal Width (cm)",
-        min_value=0.0,
-        max_value=10.0,
-        value=3.5,
-        step=0.1
-    )
-
-
-# =========================================================
-# RIGHT SIDE
-# =========================================================
 
 with col2:
-
-    petal_length = st.number_input(
-        "🌸 Petal Length (cm)",
-        min_value=0.0,
-        max_value=10.0,
-        value=1.4,
-        step=0.1
-    )
-
-    petal_width = st.number_input(
-        "🌺 Petal Width (cm)",
-        min_value=0.0,
-        max_value=10.0,
-        value=0.2,
-        step=0.1
-    )
+    if st.button(
+        "📊\n\nPROJECT DASHBOARD",
+        use_container_width=True
+    ):
+        st.switch_page("pages/Dashboard.py")
 
 
-st.write("")
+with col3:
+    if st.button(
+        "📈\n\nDATA ANALYSIS",
+        use_container_width=True
+    ):
+        st.switch_page("pages/Data_Analysis.py")
+
+
+col4, col5 = st.columns(2)
+
+with col4:
+    if st.button(
+        "🤖\n\nMODEL INFORMATION",
+        use_container_width=True
+    ):
+        st.switch_page("pages/Model_Information.py")
+
+
+with col5:
+    if st.button(
+        "ℹ️\n\nABOUT PROJECT",
+        use_container_width=True
+    ):
+        st.switch_page("pages/About.py")
 
 
 # =========================================================
-# PREDICT BUTTON
+# PROJECT STATISTICS
 # =========================================================
-
-predict_button = st.button(
-    "🌸 PREDICT FLOWER SPECIES 🌸",
-    use_container_width=True
-)
-
-
-# =========================================================
-# PREDICTION
-# =========================================================
-
-if predict_button:
-
-    input_data = [[
-        sepal_length,
-        sepal_width,
-        petal_length,
-        petal_width
-    ]]
-
-    prediction = model.predict(input_data)[0]
-
-    probabilities = model.predict_proba(input_data)[0]
-
-    flower_names = {
-        "Iris-setosa": "Setosa",
-        "Iris-versicolor": "Versicolor",
-        "Iris-virginica": "Virginica"
-    }
-
-    flower_name = flower_names.get(
-        prediction,
-        prediction
-    )
-
-
-    # =====================================================
-    # RESULT
-    # =====================================================
-
-    st.divider()
-
-    st.markdown(
-        '<div class="section-title">🎯 Prediction Result</div>',
-        unsafe_allow_html=True
-    )
-
-    st.markdown(
-        f"""
-        <div class="result-box">
-
-            <div class="result-title">
-                🌺 Predicted Flower Species
-            </div>
-
-            <div class="flower-name">
-                Iris {flower_name}
-            </div>
-
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-
-
-    st.write("")
-
-
-    # =====================================================
-    # IMAGE + CONFIDENCE
-    # =====================================================
-
-    image_col, confidence_col = st.columns(2)
-
-
-    # =====================================================
-    # FLOWER IMAGE
-    # =====================================================
-
-    with image_col:
-
-        st.subheader("🌸 Identified Flower")
-
-        if prediction == "Iris-setosa":
-
-            folder = "images/setosa"
-
-        elif prediction == "Iris-versicolor":
-
-            folder = "images/versicolor"
-
-        elif prediction == "Iris-virginica":
-
-            folder = "images/virginica"
-
-        else:
-
-            folder = None
-
-
-        if folder and os.path.exists(folder):
-
-            image_files = [
-                file
-                for file in os.listdir(folder)
-                if file.lower().endswith(
-                    (".jpg", ".jpeg", ".png")
-                )
-            ]
-
-            if image_files:
-
-                selected_image = random.choice(
-                    image_files
-                )
-
-                image_path = os.path.join(
-                    folder,
-                    selected_image
-                )
-
-                st.image(
-                    image_path,
-                    caption=f"Iris {flower_name}",
-                    use_container_width=True
-                )
-
-            else:
-
-                st.warning(
-                    "No flower images found."
-                )
-
-        else:
-
-            st.warning(
-                "Flower image folder not found."
-            )
-
-
-    # =====================================================
-    # CONFIDENCE
-    # =====================================================
-
-    with confidence_col:
-
-        st.subheader("📊 Prediction Confidence")
-
-        classes = model.classes_
-
-        for class_name, probability in zip(
-            classes,
-            probabilities
-        ):
-
-            display_name = flower_names.get(
-                class_name,
-                class_name
-            )
-
-            st.markdown(
-                f"""
-                <div class="confidence-text">
-                    🌸 Iris {display_name} —
-                    {probability * 100:.2f}%
-                </div>
-                """,
-                unsafe_allow_html=True
-            )
-
-            st.progress(
-                float(probability)
-            )
-
-
-    # =====================================================
-    # INPUT SUMMARY
-    # =====================================================
-
-    st.divider()
-
-    st.markdown(
-        '<div class="section-title">📋 Input Summary</div>',
-        unsafe_allow_html=True
-    )
-
-    c1, c2, c3, c4 = st.columns(4)
-
-    with c1:
-        st.metric(
-            "Sepal Length",
-            f"{sepal_length:.1f} cm"
-        )
-
-    with c2:
-        st.metric(
-            "Sepal Width",
-            f"{sepal_width:.1f} cm"
-        )
-
-    with c3:
-        st.metric(
-            "Petal Length",
-            f"{petal_length:.1f} cm"
-        )
-
-    with c4:
-        st.metric(
-            "Petal Width",
-            f"{petal_width:.1f} cm"
-        )
-
-
-# =========================================================
-# PROJECT INFORMATION
-# =========================================================
-
-st.divider()
 
 st.markdown(
-    '<div class="section-title">📚 Project Information</div>',
+    '<div class="section-title">Project at a Glance</div>',
     unsafe_allow_html=True
 )
 
+s1, s2, s3, s4 = st.columns(4)
 
-info1, info2, info3 = st.columns(3)
+with s1:
+    st.markdown("""
+    <div class="stat-card">
+        <div class="stat-number">150</div>
+        <div class="stat-label">Dataset Samples</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+with s2:
+    st.markdown("""
+    <div class="stat-card">
+        <div class="stat-number">4</div>
+        <div class="stat-label">Input Features</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+with s3:
+    st.markdown("""
+    <div class="stat-card">
+        <div class="stat-number">3</div>
+        <div class="stat-label">Flower Species</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+with s4:
+    st.markdown("""
+    <div class="stat-card">
+        <div class="stat-number">100%</div>
+        <div class="stat-label">Test Accuracy*</div>
+    </div>
+    """, unsafe_allow_html=True)
 
 
-with info1:
+# =========================================================
+# ABOUT THE PROJECT
+# =========================================================
 
-    st.markdown(
-        """
-        <div class="project-card">
+st.markdown('<div class="divider"></div>', unsafe_allow_html=True)
 
-        <div class="project-card-title">
-        📂 Dataset
+st.markdown(
+    '<div class="section-title">About the System</div>',
+    unsafe_allow_html=True
+)
+
+st.markdown("""
+<div class="info-card">
+
+    <div class="info-heading">
+        🌿 What does this project do?
+    </div>
+
+    <div class="info-text">
+        The system uses the measurements of an Iris flower's
+        sepal and petal to identify its species.
+        A Logistic Regression machine learning model is trained
+        using the Iris dataset and integrated into a Streamlit
+        web application for real-time prediction.
+        <br><br>
+        Users can enter the four measurements, receive the predicted
+        flower species, view the prediction confidence, and explore
+        the underlying dataset and machine learning model.
+    </div>
+
+</div>
+""", unsafe_allow_html=True)
+
+
+# =========================================================
+# INPUT FEATURES
+# =========================================================
+
+st.markdown(
+    '<div class="section-title">🌿 Classification Features</div>',
+    unsafe_allow_html=True
+)
+
+f1, f2, f3, f4 = st.columns(4)
+
+with f1:
+    st.markdown("""
+    <div class="feature-card">
+        <div class="feature-icon">📏</div>
+        <div class="feature-title">Sepal Length</div>
+        <div class="feature-text">
+            Flower sepal length measured in centimeters
         </div>
+    </div>
+    """, unsafe_allow_html=True)
 
-        <div class="project-card-text">
-        Iris Flower Dataset<br>
-        150 Samples<br>
-        4 Input Features
+with f2:
+    st.markdown("""
+    <div class="feature-card">
+        <div class="feature-icon">📐</div>
+        <div class="feature-title">Sepal Width</div>
+        <div class="feature-text">
+            Flower sepal width measured in centimeters
         </div>
+    </div>
+    """, unsafe_allow_html=True)
 
+with f3:
+    st.markdown("""
+    <div class="feature-card">
+        <div class="feature-icon">🌱</div>
+        <div class="feature-title">Petal Length</div>
+        <div class="feature-text">
+            Flower petal length measured in centimeters
         </div>
-        """,
-        unsafe_allow_html=True
-    )
+    </div>
+    """, unsafe_allow_html=True)
 
-
-with info2:
-
-    st.markdown(
-        """
-        <div class="project-card">
-
-        <div class="project-card-title">
-        🤖 Algorithm
+with f4:
+    st.markdown("""
+    <div class="feature-card">
+        <div class="feature-icon">🌿</div>
+        <div class="feature-title">Petal Width</div>
+        <div class="feature-text">
+            Flower petal width measured in centimeters
         </div>
+    </div>
+    """, unsafe_allow_html=True)
 
-        <div class="project-card-text">
-        Logistic Regression<br>
-        Supervised Learning<br>
-        Classification
+
+# =========================================================
+# SPECIES
+# =========================================================
+
+st.markdown(
+    '<div class="section-title">🌺 Supported Species</div>',
+    unsafe_allow_html=True
+)
+
+p1, p2, p3 = st.columns(3)
+
+with p1:
+    st.markdown("""
+    <div class="feature-card">
+        <div class="feature-icon">🌸</div>
+        <div class="feature-title">Iris Setosa</div>
+        <div class="feature-text">
+            One of the three classes in the dataset
         </div>
+    </div>
+    """, unsafe_allow_html=True)
 
+with p2:
+    st.markdown("""
+    <div class="feature-card">
+        <div class="feature-icon">🌷</div>
+        <div class="feature-title">Iris Versicolor</div>
+        <div class="feature-text">
+            One of the three classes in the dataset
         </div>
-        """,
-        unsafe_allow_html=True
-    )
+    </div>
+    """, unsafe_allow_html=True)
 
-
-with info3:
-
-    st.markdown(
-        """
-        <div class="project-card">
-
-        <div class="project-card-title">
-        🌺 Flower Classes
+with p3:
+    st.markdown("""
+    <div class="feature-card">
+        <div class="feature-icon">🌺</div>
+        <div class="feature-title">Iris Virginica</div>
+        <div class="feature-text">
+            One of the three classes in the dataset
         </div>
-
-        <div class="project-card-text">
-        Iris Setosa<br>
-        Iris Versicolor<br>
-        Iris Virginica
-        </div>
-
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
+    </div>
+    """, unsafe_allow_html=True)
 
 
 # =========================================================
 # TECHNOLOGIES
 # =========================================================
 
-st.write("")
+st.markdown(
+    '<div class="section-title">⚙️ Technologies</div>',
+    unsafe_allow_html=True
+)
 
-tech1, tech2, tech3, tech4 = st.columns(4)
+st.markdown("""
+<div class="tech-container">
 
+    <span class="tech">Python</span>
+    <span class="tech">Pandas</span>
+    <span class="tech">NumPy</span>
+    <span class="tech">Scikit-learn</span>
+    <span class="tech">Logistic Regression</span>
+    <span class="tech">Streamlit</span>
+    <span class="tech">Matplotlib</span>
+    <span class="tech">Joblib</span>
 
-with tech1:
-
-    st.markdown(
-        """
-        <div class="project-card">
-
-        <div class="project-card-title">
-        🐍 Python
-        </div>
-
-        <div class="project-card-text">
-        Programming Language
-        </div>
-
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-
-
-with tech2:
-
-    st.markdown(
-        """
-        <div class="project-card">
-
-        <div class="project-card-title">
-        📊 Pandas
-        </div>
-
-        <div class="project-card-text">
-        Data Processing
-        </div>
-
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-
-
-with tech3:
-
-    st.markdown(
-        """
-        <div class="project-card">
-
-        <div class="project-card-title">
-        🧠 Scikit-learn
-        </div>
-
-        <div class="project-card-text">
-        Machine Learning
-        </div>
-
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-
-
-with tech4:
-
-    st.markdown(
-        """
-        <div class="project-card">
-
-        <div class="project-card-title">
-        🖥️ Streamlit
-        </div>
-
-        <div class="project-card-text">
-        Web Application
-        </div>
-
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
+</div>
+""", unsafe_allow_html=True)
 
 
 # =========================================================
 # FOOTER
 # =========================================================
 
-st.divider()
+st.markdown("""
+<div class="footer">
 
-st.markdown(
-    """
-    <div class="footer">
-        🌸 Iris Flower Classification |
-        Machine Learning Mini Project 🌸
-        <br>
-        Built using Python, Scikit-learn and Streamlit
-    </div>
-    """,
-    unsafe_allow_html=True
-)
+    <b>Iris Flower Classification</b>
+    <br>
+    Machine Learning • Data Analysis • Interactive Prediction
+    <br><br>
+    BSc Data Science and Analytics
+    <br><br>
+    <span style="color:#475569;">
+        *100% accuracy refers to the selected 20% test split
+        used during model evaluation.
+    </span>
+
+</div>
+""", unsafe_allow_html=True)
