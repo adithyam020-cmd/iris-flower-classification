@@ -1,33 +1,148 @@
 import streamlit as st
 import joblib
+import os
 import random
-from pathlib import Path
+import pandas as pd
 
 
 # =========================================================
-# PAGE CONFIGURATION
+# PAGE SETTINGS
 # =========================================================
 
 st.set_page_config(
-    page_title="Flower Prediction",
+    page_title="Iris Flower Prediction",
     page_icon="🌸",
-    layout="wide"
+    layout="wide",
+    initial_sidebar_state="collapsed"
 )
 
 
 # =========================================================
-# PROJECT PATHS
+# CUSTOM DESIGN
 # =========================================================
 
-BASE_DIR = Path(__file__).resolve().parent.parent
+st.markdown("""
+<style>
 
-MODEL_PATH = BASE_DIR / "iris_model.pkl"
-
-IMAGE_DIRS = {
-    "Iris-setosa": BASE_DIR / "images" / "setosa",
-    "Iris-versicolor": BASE_DIR / "images" / "versicolor",
-    "Iris-virginica": BASE_DIR / "images" / "virginica"
+#MainMenu {
+    visibility: hidden;
 }
+
+header {
+    visibility: hidden;
+}
+
+footer {
+    visibility: hidden;
+}
+
+[data-testid="stSidebar"] {
+    display: none;
+}
+
+.stApp {
+    background:
+        radial-gradient(
+            circle at 8% 10%,
+            rgba(255, 190, 220, 0.42),
+            transparent 25%
+        ),
+        radial-gradient(
+            circle at 92% 15%,
+            rgba(205, 190, 255, 0.38),
+            transparent 25%
+        ),
+        radial-gradient(
+            circle at 50% 95%,
+            rgba(190, 240, 210, 0.35),
+            transparent 28%
+        ),
+        linear-gradient(
+            135deg,
+            #fff8fc,
+            #f8f4ff,
+            #f3fff8
+        );
+}
+
+.block-container {
+    max-width: 1100px;
+    padding-top: 2rem;
+    padding-bottom: 4rem;
+}
+
+h1, h2, h3 {
+    color: #633b72 !important;
+}
+
+p {
+    color: #665a6d;
+}
+
+.stNumberInput label {
+    color: #633b72 !important;
+    font-weight: 700 !important;
+}
+
+.stNumberInput input {
+    color: #43364b !important;
+    background: white !important;
+    border-radius: 12px !important;
+}
+
+.stButton {
+    text-align: center;
+}
+
+.stButton > button {
+    border: none !important;
+    border-radius: 35px !important;
+    background: linear-gradient(
+        135deg,
+        #d85c9f,
+        #8d68d8
+    ) !important;
+    color: white !important;
+    font-size: 17px !important;
+    font-weight: 800 !important;
+    padding: 0.65rem 2rem !important;
+    box-shadow: 0 8px 20px rgba(130, 90, 180, 0.20);
+}
+
+.stButton > button:hover {
+    transform: translateY(-2px);
+}
+
+[data-testid="stVerticalBlockBorderWrapper"] {
+    background: rgba(255, 255, 255, 0.78);
+    border: 1px solid rgba(255, 255, 255, 0.95);
+    border-radius: 22px;
+    box-shadow: 0 8px 25px rgba(80, 50, 90, 0.08);
+}
+
+[data-testid="stImage"] {
+    border-radius: 18px;
+}
+
+</style>
+""", unsafe_allow_html=True)
+
+
+# =========================================================
+# FIND PROJECT FOLDER
+# =========================================================
+
+CURRENT_FOLDER = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+MODEL_PATH = os.path.join(
+    CURRENT_FOLDER,
+    "iris_model.pkl"
+)
+
+IMAGE_FOLDER = os.path.join(
+    CURRENT_FOLDER,
+    "images"
+)
 
 
 # =========================================================
@@ -36,6 +151,7 @@ IMAGE_DIRS = {
 
 @st.cache_resource
 def load_model():
+
     return joblib.load(MODEL_PATH)
 
 
@@ -43,325 +159,121 @@ model = load_model()
 
 
 # =========================================================
-# CUSTOM CSS
+# PAGE TITLE
 # =========================================================
 
-st.markdown("""
-<style>
+st.title("🌸 Iris Flower Prediction")
 
-/* Background */
+st.markdown(
+    "### Enter the flower measurements and let the Machine Learning model identify the Iris species."
+)
 
-.stApp {
-    background:
-        radial-gradient(
-            circle at 10% 10%,
-            rgba(139, 92, 246, 0.20),
-            transparent 30%
-        ),
-        radial-gradient(
-            circle at 90% 15%,
-            rgba(236, 72, 153, 0.18),
-            transparent 30%
-        ),
-        linear-gradient(
-            135deg,
-            #080b16,
-            #10182d 50%,
-            #080b16
-        );
-}
-
-
-/* Container */
-
-.block-container {
-    max-width: 1200px;
-    padding-top: 2rem;
-}
-
-
-/* Heading */
-
-.page-title {
-    text-align: center;
-    color: white;
-    font-size: 46px;
-    font-weight: 900;
-}
-
-
-.page-subtitle {
-    text-align: center;
-    color: #94a3b8;
-    font-size: 17px;
-    margin-bottom: 30px;
-}
-
-
-/* Input section */
-
-.input-card {
-    background: rgba(255,255,255,0.06);
-    border: 1px solid rgba(255,255,255,0.12);
-    border-radius: 24px;
-    padding: 30px;
-
-    backdrop-filter: blur(15px);
-
-    box-shadow:
-        0 15px 40px rgba(0,0,0,0.25);
-}
-
-
-/* Labels */
-
-label {
-    color: #e2e8f0 !important;
-    font-weight: 700 !important;
-}
-
-
-/* Prediction result */
-
-.result-card {
-    margin-top: 30px;
-
-    background:
-        linear-gradient(
-            135deg,
-            rgba(236,72,153,0.15),
-            rgba(139,92,246,0.15)
-        );
-
-    border: 1px solid rgba(255,255,255,0.15);
-
-    border-radius: 24px;
-
-    padding: 30px;
-
-    text-align: center;
-}
-
-
-.result-title {
-    color: #94a3b8;
-    font-size: 16px;
-}
-
-
-.result-name {
-    color: white;
-    font-size: 38px;
-    font-weight: 900;
-    margin-top: 8px;
-}
-
-
-.confidence {
-    color: #f9a8d4;
-    font-size: 20px;
-    font-weight: 800;
-    margin-top: 10px;
-}
-
-
-/* Image card */
-
-.image-card {
-    background: rgba(255,255,255,0.06);
-
-    border: 1px solid rgba(255,255,255,0.12);
-
-    border-radius: 24px;
-
-    padding: 20px;
-
-    text-align: center;
-
-    margin-top: 30px;
-}
-
-
-/* Information card */
-
-.info-card {
-    background: rgba(255,255,255,0.055);
-
-    border: 1px solid rgba(255,255,255,0.10);
-
-    border-radius: 20px;
-
-    padding: 25px;
-
-    margin-top: 25px;
-}
-
-
-.info-title {
-    color: white;
-
-    font-size: 21px;
-
-    font-weight: 800;
-
-    margin-bottom: 15px;
-}
-
-
-.info-text {
-    color: #aeb8c8;
-
-    font-size: 15px;
-
-    line-height: 1.7;
-}
-
-
-/* Prediction button */
-
-.stButton > button {
-
-    height: 55px;
-
-    border-radius: 14px;
-
-    border: none;
-
-    background:
-        linear-gradient(
-            90deg,
-            #ec4899,
-            #8b5cf6
-        );
-
-    color: white;
-
-    font-size: 17px;
-
-    font-weight: 800;
-
-    transition: 0.25s ease;
-}
-
-
-.stButton > button:hover {
-
-    transform: translateY(-3px);
-
-    box-shadow:
-        0 10px 30px
-        rgba(139,92,246,0.45);
-}
-
-
-/* Footer */
-
-.footer {
-    text-align: center;
-
-    color: #64748b;
-
-    font-size: 14px;
-
-    margin-top: 45px;
-}
-
-</style>
-""", unsafe_allow_html=True)
+st.write("")
 
 
 # =========================================================
-# PAGE HEADER
+# MEASUREMENTS
 # =========================================================
 
-st.markdown(
-    '<div class="page-title">🌸 Flower Prediction</div>',
-    unsafe_allow_html=True
-)
+with st.container(border=True):
 
-st.markdown(
-    '<div class="page-subtitle">'
-    'Enter the flower measurements to predict its Iris species'
-    '</div>',
-    unsafe_allow_html=True
-)
+    st.subheader("🌿 Enter Flower Measurements")
 
-
-# =========================================================
-# INPUT CARD
-# =========================================================
-
-st.markdown(
-    '<div class="input-card">',
-    unsafe_allow_html=True
-)
-
-st.markdown(
-    "<h3 style='color:white;'>📏 Flower Measurements</h3>",
-    unsafe_allow_html=True
-)
-
-st.markdown(
-    "<p style='color:#94a3b8;'>"
-    "Enter all measurements in centimeters."
-    "</p>",
-    unsafe_allow_html=True
-)
-
-col1, col2 = st.columns(2)
-
-
-with col1:
-
-    sepal_length = st.number_input(
-        "🌿 Sepal Length (cm)",
-        min_value=0.0,
-        max_value=10.0,
-        value=5.1,
-        step=0.1
+    st.write(
+        "Enter the four flower measurements in centimeters."
     )
 
-    sepal_width = st.number_input(
-        "🌿 Sepal Width (cm)",
-        min_value=0.0,
-        max_value=10.0,
-        value=3.5,
-        step=0.1
-    )
+    st.write("")
 
+    col1, col2 = st.columns(2)
 
-with col2:
+    with col1:
 
-    petal_length = st.number_input(
-        "🌸 Petal Length (cm)",
-        min_value=0.0,
-        max_value=10.0,
-        value=1.4,
-        step=0.1
-    )
+        sepal_length = st.number_input(
+            "🌿 Sepal Length (cm)",
+            min_value=0.0,
+            max_value=10.0,
+            value=5.1,
+            step=0.1,
+            format="%.1f"
+        )
 
-    petal_width = st.number_input(
-        "🌸 Petal Width (cm)",
-        min_value=0.0,
-        max_value=10.0,
-        value=0.2,
-        step=0.1
-    )
+        sepal_width = st.number_input(
+            "🌿 Sepal Width (cm)",
+            min_value=0.0,
+            max_value=10.0,
+            value=3.5,
+            step=0.1,
+            format="%.1f"
+        )
 
+    with col2:
 
-st.markdown("</div>", unsafe_allow_html=True)
+        petal_length = st.number_input(
+            "🌸 Petal Length (cm)",
+            min_value=0.0,
+            max_value=10.0,
+            value=1.4,
+            step=0.1,
+            format="%.1f"
+        )
+
+        petal_width = st.number_input(
+            "🌸 Petal Width (cm)",
+            min_value=0.0,
+            max_value=10.0,
+            value=0.2,
+            step=0.1,
+            format="%.1f"
+        )
 
 
 # =========================================================
 # PREDICT BUTTON
 # =========================================================
 
-st.markdown("<br>", unsafe_allow_html=True)
+st.write("")
 
-predict_button = st.button(
-    "🔮 PREDICT FLOWER SPECIES",
-    use_container_width=True
+button_col1, button_col2, button_col3 = st.columns(
+    [1, 1, 1]
 )
+
+with button_col2:
+
+    predict_button = st.button(
+        "🔮 Predict Flower",
+        use_container_width=True
+    )
+
+
+# =========================================================
+# SPECIES INFORMATION
+# =========================================================
+
+species_info = {
+
+    "Iris-setosa": {
+        "name": "Iris Setosa",
+        "emoji": "🌼",
+        "folder": "setosa",
+        "description": "A small Iris flower with narrow petals."
+    },
+
+    "Iris-versicolor": {
+        "name": "Iris Versicolor",
+        "emoji": "🌷",
+        "folder": "versicolor",
+        "description": "An Iris species with medium-sized petals."
+    },
+
+    "Iris-virginica": {
+        "name": "Iris Virginica",
+        "emoji": "🌺",
+        "folder": "virginica",
+        "description": "A larger Iris species with longer petals."
+    }
+
+}
 
 
 # =========================================================
@@ -370,181 +282,282 @@ predict_button = st.button(
 
 if predict_button:
 
-    input_data = [[
-        sepal_length,
-        sepal_width,
-        petal_length,
-        petal_width
-    ]]
+    # -----------------------------------------------------
+    # CREATE DATAFRAME
+    # -----------------------------------------------------
+
+    input_data = pd.DataFrame(
+        [[
+            sepal_length,
+            sepal_width,
+            petal_length,
+            petal_width
+        ]],
+        columns=[
+            "SepalLengthCm",
+            "SepalWidthCm",
+            "PetalLengthCm",
+            "PetalWidthCm"
+        ]
+    )
+
+    # -----------------------------------------------------
+    # PREDICT
+    # -----------------------------------------------------
 
     prediction = model.predict(input_data)[0]
 
     probabilities = model.predict_proba(input_data)[0]
 
-    classes = model.classes_
-
     confidence = max(probabilities) * 100
 
+    result = species_info[prediction]
 
-    # -----------------------------------------------------
+
+    # =====================================================
     # RESULT
-    # -----------------------------------------------------
+    # =====================================================
 
-    st.markdown(
-        f"""
-        <div class="result-card">
+    st.write("")
+    st.write("")
 
-            <div class="result-title">
-                Predicted Flower Species
-            </div>
+    with st.container(border=True):
 
-            <div class="result-name">
-                🌸 {prediction}
-            </div>
+        st.subheader("🌸 Prediction Result")
 
-            <div class="confidence">
-                Confidence: {confidence:.2f}%
-            </div>
+        st.write("")
 
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
+        result_col1, result_col2 = st.columns(2)
 
 
-    # -----------------------------------------------------
-    # FLOWER IMAGE
-    # -----------------------------------------------------
+        # -------------------------------------------------
+        # FIND FLOWER IMAGE
+        # -------------------------------------------------
 
-    image_folder = IMAGE_DIRS.get(prediction)
+        with result_col1:
 
-    if image_folder and image_folder.exists():
-
-        image_files = [
-            file
-            for file in image_folder.iterdir()
-            if file.suffix.lower() in
-            [".jpg", ".jpeg", ".png", ".webp"]
-        ]
-
-        if image_files:
-
-            selected_image = random.choice(image_files)
-
-            st.markdown(
-                '<div class="image-card">',
-                unsafe_allow_html=True
+            flower_folder = os.path.join(
+                IMAGE_FOLDER,
+                result["folder"]
             )
 
-            st.markdown(
-                "<h3 style='color:white;'>🌺 Predicted Flower</h3>",
-                unsafe_allow_html=True
+            image_files = []
+
+            if os.path.exists(flower_folder):
+
+                for file in os.listdir(flower_folder):
+
+                    if file.lower().endswith(
+                        (".jpg", ".jpeg", ".png")
+                    ):
+
+                        image_files.append(
+                            os.path.join(
+                                flower_folder,
+                                file
+                            )
+                        )
+
+
+            # ---------------------------------------------
+            # DISPLAY IMAGE
+            # ---------------------------------------------
+
+            if len(image_files) > 0:
+
+                selected_image = random.choice(
+                    image_files
+                )
+
+                st.image(
+                    selected_image,
+                    caption=result["name"],
+                    use_container_width=True
+                )
+
+            else:
+
+                st.info(
+                    "Flower image not found."
+                )
+
+
+        # -------------------------------------------------
+        # RESULT INFORMATION
+        # -------------------------------------------------
+
+        with result_col2:
+
+            st.write("")
+            st.write("")
+
+            st.subheader(
+                result["emoji"] + " " + result["name"]
             )
 
-            st.image(
-                str(selected_image),
-                width=400
+            st.write(
+                result["description"]
             )
 
-            st.markdown(
-                "</div>",
-                unsafe_allow_html=True
+            st.write("")
+
+            st.write(
+                "### 🎯 Prediction Confidence"
             )
 
-    else:
+            st.progress(
+                int(confidence)
+            )
 
-        st.warning(
-            "Flower image folder was not found."
-        )
+            st.write(
+                f"**Confidence: {confidence:.2f}%**"
+            )
 
 
-    # -----------------------------------------------------
-    # CLASS PROBABILITIES
-    # -----------------------------------------------------
+# =========================================================
+# HOW IT WORKS
+# =========================================================
 
-    st.markdown(
-        '<div class="info-card">',
-        unsafe_allow_html=True
-    )
+st.write("")
+st.write("")
 
-    st.markdown(
-        '<div class="info-title">'
-        '📊 Prediction Probabilities'
-        '</div>',
-        unsafe_allow_html=True
-    )
+st.subheader("⚙️ How The Prediction Works")
 
-    for class_name, probability in zip(classes, probabilities):
+st.write(
+    "The system follows four simple Machine Learning steps."
+)
+
+st.write("")
+
+step1, step2, step3, step4 = st.columns(4)
+
+
+with step1:
+
+    with st.container(border=True):
+
+        st.subheader("1️⃣ Input")
 
         st.write(
-            f"**{class_name}** — "
-            f"{probability * 100:.2f}%"
+            "Enter the four flower measurements."
         )
 
-        st.progress(
-            float(probability)
+
+with step2:
+
+    with st.container(border=True):
+
+        st.subheader("2️⃣ Prepare")
+
+        st.write(
+            "The measurements are prepared for the model."
         )
 
-    st.markdown(
-        "</div>",
-        unsafe_allow_html=True
-    )
 
+with step3:
 
-    # -----------------------------------------------------
-    # INPUT SUMMARY
-    # -----------------------------------------------------
+    with st.container(border=True):
 
-    st.markdown(
-        '<div class="info-card">',
-        unsafe_allow_html=True
-    )
+        st.subheader("3️⃣ Predict")
 
-    st.markdown(
-        '<div class="info-title">'
-        '📋 Input Summary'
-        '</div>',
-        unsafe_allow_html=True
-    )
-
-    summary_col1, summary_col2, summary_col3, summary_col4 = st.columns(4)
-
-    with summary_col1:
-        st.metric(
-            "Sepal Length",
-            f"{sepal_length:.1f} cm"
+        st.write(
+            "Logistic Regression analyzes the measurements."
         )
 
-    with summary_col2:
-        st.metric(
-            "Sepal Width",
-            f"{sepal_width:.1f} cm"
+
+with step4:
+
+    with st.container(border=True):
+
+        st.subheader("4️⃣ Result")
+
+        st.write(
+            "The predicted Iris species is displayed."
         )
 
-    with summary_col3:
-        st.metric(
-            "Petal Length",
-            f"{petal_length:.1f} cm"
+
+# =========================================================
+# MEASUREMENT INFORMATION
+# =========================================================
+
+st.write("")
+
+with st.container(border=True):
+
+    st.subheader("📖 Understanding The Measurements")
+
+    info1, info2 = st.columns(2)
+
+    with info1:
+
+        st.markdown("**🌿 Sepal Length**")
+
+        st.write(
+            "The length of the sepal measured in centimeters."
         )
 
-    with summary_col4:
-        st.metric(
-            "Petal Width",
-            f"{petal_width:.1f} cm"
+        st.markdown("**🌿 Sepal Width**")
+
+        st.write(
+            "The width of the sepal measured in centimeters."
         )
 
-    st.markdown(
-        "</div>",
-        unsafe_allow_html=True
-    )
+
+    with info2:
+
+        st.markdown("**🌸 Petal Length**")
+
+        st.write(
+            "The length of the petal measured in centimeters."
+        )
+
+        st.markdown("**🌸 Petal Width**")
+
+        st.write(
+            "The width of the petal measured in centimeters."
+        )
+
+
+# =========================================================
+# MODEL INFORMATION
+# =========================================================
+
+st.write("")
+
+with st.container(border=True):
+
+    st.subheader("🤖 Model Information")
+
+    model_col1, model_col2, model_col3 = st.columns(3)
+
+    with model_col1:
+
+        st.write("**Algorithm**")
+
+        st.write("Logistic Regression")
+
+
+    with model_col2:
+
+        st.write("**Input Features**")
+
+        st.write("4 Flower Measurements")
+
+
+    with model_col3:
+
+        st.write("**Output Classes**")
+
+        st.write("3 Iris Species")
 
 
 # =========================================================
 # FOOTER
 # =========================================================
 
-st.markdown("""
-<div class="footer">
-    Iris Flower Classification • BSc Data Science and Analytics
-</div>
-""", unsafe_allow_html=True)
+st.write("")
+st.write("")
+
+st.caption(
+    "🌸 Iris Flower Classification • Powered by Machine Learning • Logistic Regression"
+)
